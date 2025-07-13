@@ -70,12 +70,6 @@ module "security_groups" {
   allowed_ssh_cidrs = ["10.0.0.0/8"]  # Restrict SSH access to internal network
 }
 
-module "ec2" {
-  source = "../../modules/ec2"
-  env    = "dev"
-  vpc_security_group_ids = [module.security_groups.web_security_group_id]
-}
-
 module "monitoring" {
   source = "../../modules/monitoring"
 
@@ -161,19 +155,40 @@ module "alb" {
   ]
 }
 
+module "ecs" {
+  source = "../../modules/ecs"
+
+  project               = "demo"
+  env                  = "dev"
+  vpc_id               = module.vpc.vpc_id
+  subnet_ids           = module.vpc.private_subnet_ids
+  target_group_arn     = module.alb.target_group_arn
+  container_port       = 80
+  container_image      = "nginx:latest"  # Replace with your container image
+  desired_count        = 2
+  cpu                  = 256
+  memory               = 512
+  alb_security_group_id = module.alb.security_group_id
+
+  depends_on = [
+    module.vpc,
+    module.alb
+  ]
+}
+
 module "auto_healing" {
   source = "../../modules/auto_healing"
 
   project                   = "demo"
   env                      = "dev"
-  instance_ids             = module.ec2.instance_ids
+  instance_ids             = []  # ASG manages instances now
   target_group_arn         = module.alb.target_group_arn
   health_check_grace_period = 300
   unhealthy_threshold      = 3
   alert_email             = "alerts@example.com"
 
   depends_on = [
-    module.ec2,
+    module.ecs,
     module.alb
   ]
 }
