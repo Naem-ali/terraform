@@ -190,3 +190,59 @@ resource "aws_vpc_endpoint" "interface_endpoints" {
     Environment = var.env
   }
 }
+
+resource "aws_network_acl" "public" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name        = "${var.project}-${var.env}-public-nacl"
+    Environment = var.env
+  }
+}
+
+resource "aws_network_acl_rule" "public" {
+  count          = length(var.public_nacl_rules)
+  network_acl_id = aws_network_acl.public.id
+  
+  rule_number = var.public_nacl_rules[count.index].rule_number
+  egress     = var.public_nacl_rules[count.index].egress
+  protocol   = var.public_nacl_rules[count.index].protocol
+  rule_action = var.public_nacl_rules[count.index].rule_action
+  cidr_block = var.public_nacl_rules[count.index].cidr_block
+  from_port  = var.public_nacl_rules[count.index].from_port
+  to_port    = var.public_nacl_rules[count.index].to_port
+}
+
+resource "aws_network_acl" "private" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name        = "${var.project}-${var.env}-private-nacl"
+    Environment = var.env
+  }
+}
+
+resource "aws_network_acl_rule" "private" {
+  count          = length(var.private_nacl_rules)
+  network_acl_id = aws_network_acl.private.id
+  
+  rule_number = var.private_nacl_rules[count.index].rule_number
+  egress     = var.private_nacl_rules[count.index].egress
+  protocol   = var.private_nacl_rules[count.index].protocol
+  rule_action = var.private_nacl_rules[count.index].rule_action
+  cidr_block = var.private_nacl_rules[count.index].cidr_block
+  from_port  = var.private_nacl_rules[count.index].from_port
+  to_port    = var.private_nacl_rules[count.index].to_port
+}
+
+resource "aws_network_acl_association" "public" {
+  count          = length(var.public_subnet_cidrs)
+  network_acl_id = aws_network_acl.public.id
+  subnet_id      = aws_subnet.public[count.index].id
+}
+
+resource "aws_network_acl_association" "private" {
+  count          = length(var.private_subnet_cidrs)
+  network_acl_id = aws_network_acl.private.id
+  subnet_id      = aws_subnet.private[count.index].id
+}

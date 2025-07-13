@@ -12,6 +12,14 @@ module "vpc" {
   private_subnet_cidrs = ["10.0.3.0/24", "10.0.4.0/24"]
   enable_nat_gateway   = true
   single_nat_gateway   = true  # Use single NAT Gateway for dev environment to save costs
+  enable_vpc_endpoints = true
+  vpc_endpoint_services = [
+    "s3",
+    "dynamodb",
+    "ssm",
+    "ec2messages",
+    "ssmmessages"
+  ]
 }
 
 module "security_groups" {
