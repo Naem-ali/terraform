@@ -29,3 +29,15 @@ variable "blocked_domains" {
   type        = list(string)
   default     = ["*.evil.com", "*.malware.com"]
 }
+
+variable "enable_logging" {
+  description = "Enable logging to CloudWatch"
+  type        = bool
+  default     = true
+}
+
+variable "log_retention_days" {
+  description = "Number of days to retain logs"
+  type        = number
+  default     = 30
+}

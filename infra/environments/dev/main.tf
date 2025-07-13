@@ -40,6 +40,25 @@ module "vpc" {
   )
   
   private_nacl_rules = var.private_nacl_rules
+
+  depends_on = [module.network_firewall]
+}
+
+module "network_firewall" {
+  source = "../../modules/network_firewall"
+
+  vpc_id               = module.vpc.vpc_id
+  firewall_subnet_cidrs = ["10.0.5.0/24", "10.0.6.0/24"]
+  env                  = "dev"
+  project              = "demo"
+  allowed_domains      = ["*.amazonaws.com", "*.github.com", "*.docker.com"]
+  blocked_domains      = [
+    "*.evil.com",
+    "*.malware.com",
+    "*.suspicious.com"
+  ]
+  enable_logging      = true
+  log_retention_days = 14  # Shorter retention for dev environment
 }
 
 module "security_groups" {
@@ -55,4 +74,20 @@ module "ec2" {
   source = "../../modules/ec2"
   env    = "dev"
   vpc_security_group_ids = [module.security_groups.web_security_group_id]
+}
+
+module "monitoring" {
+  source = "../../modules/monitoring"
+
+  project      = "demo"
+  env         = "dev"
+  vpc_id      = module.vpc.vpc_id
+  alert_email = "alerts@example.com"
+  instance_ids = module.ec2.instance_ids
+
+  depends_on = [
+    module.vpc,
+    module.ec2,
+    module.network_firewall
+  ]
 }

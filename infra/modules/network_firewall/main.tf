@@ -102,3 +102,35 @@ resource "aws_subnet" "firewall" {
 data "aws_availability_zones" "available" {
   state = "available"
 }
+
+resource "aws_cloudwatch_log_group" "firewall" {
+  count             = var.enable_logging ? 1 : 0
+  name              = "/aws/network-firewall/${var.project}-${var.env}"
+  retention_in_days = var.log_retention_days
+
+  tags = {
+    Name        = "${var.project}-${var.env}-firewall-logs"
+    Environment = var.env
+  }
+}
+
+resource "aws_networkfirewall_logging_configuration" "main" {
+  count        = var.enable_logging ? 1 : 0
+  firewall_arn = aws_networkfirewall_firewall.main.arn
+  logging_configuration {
+    log_destination_config {
+      log_destination = {
+        logGroup = aws_cloudwatch_log_group.firewall[0].name
+      }
+      log_destination_type = "CloudWatchLogs"
+      log_type            = "ALERT"
+    }
+    log_destination_config {
+      log_destination = {
+        logGroup = aws_cloudwatch_log_group.firewall[0].name
+      }
+      log_destination_type = "CloudWatchLogs"
+      log_type            = "FLOW"
+    }
+  }
+}
