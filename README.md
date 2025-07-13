@@ -150,10 +150,3 @@ Regular tasks:
 4. Submit pull request
 5. Wait for review
 
-## Contact
-
-For support: your.email@example.com
-
-## License
-
-MIT License
