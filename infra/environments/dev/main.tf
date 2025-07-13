@@ -2,12 +2,17 @@ provider "aws" {
   region = "us-west-2"
 }
 
+locals {
+  project = "demo"
+  environment = "dev"
+}
+
 module "vpc" {
   source = "../../modules/vpc"
 
   cidr_block           = "10.0.0.0/16"
-  env                  = "dev"
-  project              = "demo"
+  env                  = local.environment
+  project              = local.project
   public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
   private_subnet_cidrs = ["10.0.3.0/24", "10.0.4.0/24"]
   enable_nat_gateway   = true
@@ -49,8 +54,8 @@ module "network_firewall" {
 
   vpc_id               = module.vpc.vpc_id
   firewall_subnet_cidrs = ["10.0.5.0/24", "10.0.6.0/24"]
-  env                  = "dev"
-  project              = "demo"
+  env                  = local.environment
+  project              = local.project
   allowed_domains      = ["*.amazonaws.com", "*.github.com", "*.docker.com"]
   blocked_domains      = [
     "*.evil.com",
@@ -65,16 +70,16 @@ module "security_groups" {
   source = "../../modules/security_groups"
 
   vpc_id           = module.vpc.vpc_id
-  env              = "dev"
-  project          = "demo"
+  env              = local.environment
+  project          = local.project
   allowed_ssh_cidrs = ["10.0.0.0/8"]  # Restrict SSH access to internal network
 }
 
 module "monitoring" {
   source = "../../modules/monitoring"
 
-  project      = "demo"
-  env         = "dev"
+  project      = local.project
+  env         = local.environment
   vpc_id      = module.vpc.vpc_id
   alert_email = "alerts@example.com"
   instance_ids = module.ec2.instance_ids
@@ -94,8 +99,8 @@ module "monitoring" {
 module "config" {
   source = "../../modules/config"
 
-  project                   = "demo"
-  env                      = "dev"
+  project                   = local.project
+  env                      = local.environment
   vpc_id                   = module.vpc.vpc_id
   config_logs_retention_days = 30  # Shorter retention for dev environment
   config_rules             = [
@@ -113,8 +118,8 @@ module "config" {
 module "guardduty" {
   source = "../../modules/guardduty"
 
-  project                     = "demo"
-  env                        = "dev"
+  project                     = local.project
+  env                        = local.environment
   findings_retention_days     = 30  # Shorter retention for dev environment
   finding_publishing_frequency = "FIFTEEN_MINUTES"
   enable_s3_logs             = true
@@ -123,8 +128,8 @@ module "guardduty" {
 module "xray" {
   source = "../../modules/xray"
 
-  project       = "demo"
-  env          = "dev"
+  project       = local.project
+  env          = local.environment
   vpc_id       = module.vpc.vpc_id
   subnet_ids   = module.vpc.private_subnet_ids
   sampling_rate = 10  # Higher sampling rate for dev environment
@@ -137,8 +142,8 @@ module "xray" {
 module "acm" {
   source = "../../modules/acm"
 
-  project  = "demo"
-  env     = "dev"
+  project  = local.project
+  env     = local.environment
   domain_name = "dev.yourdomain.com"
   subject_alternative_names = ["*.dev.yourdomain.com"]
   
@@ -154,8 +159,8 @@ module "acm" {
 module "alb" {
   source = "../../modules/alb"
 
-  project              = "demo"
-  env                 = "dev"
+  project              = local.project
+  env                 = local.environment
   vpc_id              = module.vpc.vpc_id
   subnet_ids          = module.vpc.public_subnet_ids
   target_instances    = module.ec2.instance_ids
@@ -189,8 +194,8 @@ resource "aws_route53_record" "alb" {
 module "route53" {
   source = "../../modules/route53"
 
-  project         = "demo"
-  env            = "dev"
+  project         = local.project
+  env            = local.environment
   domain_name    = "yourdomain.com"
   
   create_public_zone  = true
@@ -235,8 +240,8 @@ module "route53" {
 module "ecs" {
   source = "../../modules/ecs"
 
-  project               = "demo"
-  env                  = "dev"
+  project               = local.project
+  env                  = local.environment
   vpc_id               = module.vpc.vpc_id
   subnet_ids           = module.vpc.private_subnet_ids
   target_group_arn     = module.alb.target_group_arn
@@ -249,8 +254,7 @@ module "ecs" {
 
   container_definitions = jsonencode([
     {
-      name  = "${var.project}-${var.env}-container"
-      image = var.container_image
+      name  = "${local.project}-${local.environment}-container"
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -272,8 +276,8 @@ module "ecs" {
 module "auto_healing" {
   source = "../../modules/auto_healing"
 
-  project                   = "demo"
-  env                      = "dev"
+  project                   = local.project
+  env                      = local.environment
   instance_ids             = []  # ASG manages instances now
   target_group_arn         = module.alb.target_group_arn
   health_check_grace_period = 300
@@ -289,8 +293,8 @@ module "auto_healing" {
 module "cloudwatch_logs" {
   source = "../../modules/cloudwatch_logs"
 
-  project = "demo"
-  env     = "dev"
+  project = local.project
+  env     = local.environment
   
   alarm_thresholds = {
     cpu_utilization    = 70  # More lenient for dev
