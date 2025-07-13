@@ -139,3 +139,24 @@ module "xray" {
     module.vpc
   ]
 }
+
+module "alb" {
+  source = "../../modules/alb"
+
+  project              = "demo"
+  env                 = "dev"
+  vpc_id              = module.vpc.vpc_id
+  subnet_ids          = module.vpc.public_subnet_ids
+  target_instances    = module.ec2.instance_ids
+  health_check_path   = "/health"
+  allowed_cidrs       = ["0.0.0.0/0"]  # Restrict in production
+  enable_access_logs  = true
+  logs_retention_days = 14  # Shorter retention for dev environment
+  enable_deletion_protection = false  # Easier cleanup in dev
+  idle_timeout        = 60
+
+  depends_on = [
+    module.vpc,
+    module.ec2
+  ]
+}
