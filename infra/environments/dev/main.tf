@@ -170,6 +170,22 @@ module "ecs" {
   memory               = 512
   alb_security_group_id = module.alb.security_group_id
 
+  container_definitions = jsonencode([
+    {
+      name  = "${var.project}-${var.env}-container"
+      image = var.container_image
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = module.cloudwatch_logs.log_groups["api"].name
+          awslogs-region        = data.aws_region.current.name
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+      # ...rest of container definition...
+    }
+  ])
+
   depends_on = [
     module.vpc,
     module.alb
@@ -190,5 +206,69 @@ module "auto_healing" {
   depends_on = [
     module.ecs,
     module.alb
+  ]
+}
+
+module "cloudwatch_logs" {
+  source = "../../modules/cloudwatch_logs"
+
+  project = "demo"
+  env     = "dev"
+  
+  services = {
+    api = {
+      retention_days = 14
+      export_to_s3  = true
+      kms_encrypted = true
+      metric_filters = [
+        {
+          name    = "errors"
+          pattern = "[timestamp, requestid, level = ERROR, message]"
+          metric = {
+            name      = "ApiErrorCount"
+            namespace = "CustomMetrics/Api"
+            value     = "1"
+          }
+        }
+      ]
+    },
+    web = {
+      retention_days = 14
+      export_to_s3  = true
+      kms_encrypted = true
+      metric_filters = [
+        {
+          name    = "5xx-errors"
+          pattern = "[timestamp, requestid, status_code=5*]"
+          metric = {
+            name      = "5xxErrorCount"
+            namespace = "CustomMetrics/Web"
+            value     = "1"
+          }
+        }
+      ]
+    },
+    auth = {
+      retention_days = 30  # Keep auth logs longer
+      export_to_s3  = true
+      kms_encrypted = true
+      metric_filters = [
+        {
+          name    = "failed-logins"
+          pattern = "[timestamp, requestid, event = LOGIN_FAILED]"
+          metric = {
+            name      = "FailedLoginCount"
+            namespace = "CustomMetrics/Auth"
+            value     = "1"
+          }
+        }
+      ]
+    }
+  }
+
+  logs_bucket_name = module.s3_logs.bucket_name  # If you have an S3 bucket module
+
+  depends_on = [
+    module.vpc
   ]
 }
