@@ -125,3 +125,17 @@ module "guardduty" {
   finding_publishing_frequency = "FIFTEEN_MINUTES"
   enable_s3_logs             = true
 }
+
+module "xray" {
+  source = "../../modules/xray"
+
+  project       = "demo"
+  env          = "dev"
+  vpc_id       = module.vpc.vpc_id
+  subnet_ids   = module.vpc.private_subnet_ids
+  sampling_rate = 10  # Higher sampling rate for dev environment
+
+  depends_on = [
+    module.vpc
+  ]
+}
