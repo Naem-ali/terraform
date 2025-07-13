@@ -134,6 +134,23 @@ module "xray" {
   ]
 }
 
+module "acm" {
+  source = "../../modules/acm"
+
+  project  = "demo"
+  env     = "dev"
+  domain_name = "dev.yourdomain.com"
+  subject_alternative_names = ["*.dev.yourdomain.com"]
+  
+  tags = {
+    ManagedBy = "terraform"
+  }
+
+  depends_on = [
+    module.vpc
+  ]
+}
+
 module "alb" {
   source = "../../modules/alb"
 
@@ -148,11 +165,25 @@ module "alb" {
   logs_retention_days = 14  # Shorter retention for dev environment
   enable_deletion_protection = false  # Easier cleanup in dev
   idle_timeout        = 60
+  
+  certificate_arn     = module.acm.certificate_arn
 
   depends_on = [
     module.vpc,
-    module.ec2
+    module.acm
   ]
+}
+
+resource "aws_route53_record" "alb" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "dev.yourdomain.com"
+  type    = "A"
+
+  alias {
+    name                   = module.alb.alb_dns_name
+    zone_id                = module.alb.alb_zone_id
+    evaluate_target_health = true
+  }
 }
 
 module "ecs" {

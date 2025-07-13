@@ -186,3 +186,8 @@ output "security_group_id" {
   description = "ID of ALB security group"
   value       = aws_security_group.alb.id
 }
+
+output "alb_zone_id" {
+  description = "Zone ID of ALB"
+  value       = aws_lb.main.zone_id
+}
