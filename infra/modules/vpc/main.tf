@@ -2,6 +2,8 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
+data "aws_region" "current" {}
+
 resource "aws_vpc" "main" {
   cidr_block           = var.cidr_block
   enable_dns_hostnames = true
@@ -110,4 +112,81 @@ resource "aws_route_table_association" "private" {
   count          = length(var.private_subnet_cidrs)
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private[count.index].id
+}
+
+resource "aws_security_group" "vpc_endpoints" {
+  count       = var.enable_vpc_endpoints ? 1 : 0
+  name_prefix = "${var.project}-${var.env}-vpce-"
+  description = "Security group for VPC endpoints"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [var.cidr_block]
+    description = "HTTPS from VPC CIDR"
+  }
+
+  tags = {
+    Name        = "${var.project}-${var.env}-vpce-sg"
+    Environment = var.env
+  }
+}
+
+# S3 Gateway Endpoint
+resource "aws_vpc_endpoint" "s3" {
+  count             = var.enable_vpc_endpoints && contains(var.vpc_endpoint_services, "s3") ? 1 : 0
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.${data.aws_region.current.name}.s3"
+  vpc_endpoint_type = "Gateway"
+
+  route_table_ids = concat(
+    [aws_route_table.public.id],
+    aws_route_table.private[*].id
+  )
+
+  tags = {
+    Name        = "${var.project}-${var.env}-s3-endpoint"
+    Environment = var.env
+  }
+}
+
+# DynamoDB Gateway Endpoint
+resource "aws_vpc_endpoint" "dynamodb" {
+  count             = var.enable_vpc_endpoints && contains(var.vpc_endpoint_services, "dynamodb") ? 1 : 0
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.${data.aws_region.current.name}.dynamodb"
+  vpc_endpoint_type = "Gateway"
+
+  route_table_ids = concat(
+    [aws_route_table.public.id],
+    aws_route_table.private[*].id
+  )
+
+  tags = {
+    Name        = "${var.project}-${var.env}-dynamodb-endpoint"
+    Environment = var.env
+  }
+}
+
+# Interface Endpoints
+resource "aws_vpc_endpoint" "interface_endpoints" {
+  for_each = var.enable_vpc_endpoints ? {
+    for service in var.vpc_endpoint_services : service => service
+    if service != "s3" && service != "dynamodb"
+  } : {}
+
+  vpc_id              = aws_vpc.main.id
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.${each.value}"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+
+  subnet_ids = aws_subnet.private[*].id
+  security_group_ids = [aws_security_group.vpc_endpoints[0].id]
+
+  tags = {
+    Name        = "${var.project}-${var.env}-${each.value}-endpoint"
+    Environment = var.env
+  }
 }
