@@ -85,6 +85,11 @@ module "monitoring" {
   alert_email = "alerts@example.com"
   instance_ids = module.ec2.instance_ids
 
+  memory_threshold     = 85
+  disk_threshold      = 90
+  network_baseline    = 10000000  # 10MB/s for dev
+  error_rate_threshold = 10       # More lenient for dev
+
   depends_on = [
     module.vpc,
     module.ec2,
