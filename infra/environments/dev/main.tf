@@ -160,3 +160,20 @@ module "alb" {
     module.ec2
   ]
 }
+
+module "auto_healing" {
+  source = "../../modules/auto_healing"
+
+  project                   = "demo"
+  env                      = "dev"
+  instance_ids             = module.ec2.instance_ids
+  target_group_arn         = module.alb.target_group_arn
+  health_check_grace_period = 300
+  unhealthy_threshold      = 3
+  alert_email             = "alerts@example.com"
+
+  depends_on = [
+    module.ec2,
+    module.alb
+  ]
+}
