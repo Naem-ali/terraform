@@ -96,3 +96,22 @@ module "monitoring" {
     module.network_firewall
   ]
 }
+
+module "config" {
+  source = "../../modules/config"
+
+  project                   = "demo"
+  env                      = "dev"
+  vpc_id                   = module.vpc.vpc_id
+  config_logs_retention_days = 30  # Shorter retention for dev environment
+  config_rules             = [
+    "vpc-sg-open-only-to-authorized-ports",
+    "vpc-default-security-group-closed",
+    "vpc-flow-logs-enabled",
+    "vpc-network-acl-unused-check"
+  ]
+
+  depends_on = [
+    module.vpc
+  ]
+}
