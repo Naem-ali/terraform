@@ -215,6 +215,17 @@ module "cloudwatch_logs" {
   project = "demo"
   env     = "dev"
   
+  alarm_thresholds = {
+    cpu_utilization    = 70  # More lenient for dev
+    memory_utilization = 75
+    disk_utilization   = 80
+  }
+
+  alarm_actions = [
+    module.sns.topic_arn,  # Assuming you have an SNS module
+    "arn:aws:automate:${data.aws_region.current.name}:ec2:reboot"
+  ]
+
   services = {
     api = {
       retention_days = 14
@@ -269,6 +280,7 @@ module "cloudwatch_logs" {
   logs_bucket_name = module.s3_logs.bucket_name  # If you have an S3 bucket module
 
   depends_on = [
-    module.vpc
+    module.vpc,
+    module.sns
   ]
 }

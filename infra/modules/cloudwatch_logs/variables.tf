@@ -31,3 +31,23 @@ variable "logs_bucket_name" {
   type        = string
   default     = null
 }
+
+variable "alarm_thresholds" {
+  description = "Map of alarm thresholds for different metrics"
+  type = object({
+    cpu_utilization    = number
+    memory_utilization = number
+    disk_utilization   = number
+  })
+  default = {
+    cpu_utilization    = 80
+    memory_utilization = 85
+    disk_utilization   = 85
+  }
+}
+
+variable "alarm_actions" {
+  description = "List of ARNs to notify when alarm triggers"
+  type        = list(string)
+  default     = []
+}
