@@ -115,3 +115,13 @@ module "config" {
     module.vpc
   ]
 }
+
+module "guardduty" {
+  source = "../../modules/guardduty"
+
+  project                     = "demo"
+  env                        = "dev"
+  findings_retention_days     = 30  # Shorter retention for dev environment
+  finding_publishing_frequency = "FIFTEEN_MINUTES"
+  enable_s3_logs             = true
+}
