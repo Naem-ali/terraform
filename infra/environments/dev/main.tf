@@ -147,7 +147,7 @@ module "acm" {
   }
 
   depends_on = [
-    module.vpc
+    module.route53
   ]
 }
 
@@ -184,6 +184,52 @@ resource "aws_route53_record" "alb" {
     zone_id                = module.alb.alb_zone_id
     evaluate_target_health = true
   }
+}
+
+module "route53" {
+  source = "../../modules/route53"
+
+  project         = "demo"
+  env            = "dev"
+  domain_name    = "yourdomain.com"
+  
+  create_public_zone  = true
+  create_private_zone = true
+  vpc_id             = module.vpc.vpc_id
+
+  records = {
+    "api.dev.yourdomain.com" = {
+      type = "A"
+      alias = {
+        name                   = module.alb.alb_dns_name
+        zone_id               = module.alb.alb_zone_id
+        evaluate_target_health = true
+      }
+    }
+    "www.dev.yourdomain.com" = {
+      type = "A"
+      alias = {
+        name                   = module.alb.alb_dns_name
+        zone_id               = module.alb.alb_zone_id
+        evaluate_target_health = true
+      }
+    }
+    "mail.dev.yourdomain.com" = {
+      type    = "MX"
+      ttl     = 300
+      records = ["10 mail.yourdomain.com"]
+    }
+    "_dmarc.dev.yourdomain.com" = {
+      type    = "TXT"
+      ttl     = 300
+      records = ["v=DMARC1; p=reject; rua=mailto:dmarc@yourdomain.com"]
+    }
+  }
+
+  depends_on = [
+    module.vpc,
+    module.alb
+  ]
 }
 
 module "ecs" {
