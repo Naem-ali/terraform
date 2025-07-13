@@ -246,3 +246,94 @@ resource "aws_network_acl_association" "private" {
   network_acl_id = aws_network_acl.private.id
   subnet_id      = aws_subnet.private[count.index].id
 }
+
+resource "aws_s3_bucket" "flow_logs" {
+  count  = var.enable_flow_logs ? 1 : 0
+  bucket = "${var.project}-${var.env}-vpc-flow-logs-${data.aws_region.current.name}"
+
+  tags = {
+    Name        = "${var.project}-${var.env}-vpc-flow-logs"
+    Environment = var.env
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "flow_logs" {
+  count  = var.enable_flow_logs ? 1 : 0
+  bucket = aws_s3_bucket.flow_logs[0].id
+
+  rule {
+    id     = "cleanup"
+    status = "Enabled"
+
+    expiration {
+      days = var.flow_logs_retention_days
+    }
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "flow_logs" {
+  count  = var.enable_flow_logs ? 1 : 0
+  bucket = aws_s3_bucket.flow_logs[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_iam_role" "flow_logs" {
+  count = var.enable_flow_logs ? 1 : 0
+  name  = "${var.project}-${var.env}-flow-logs-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "vpc-flow-logs.amazonaws.com"
+      }
+    }]
+  })
+
+  tags = {
+    Name        = "${var.project}-${var.env}-flow-logs-role"
+    Environment = var.env
+  }
+}
+
+resource "aws_iam_role_policy" "flow_logs" {
+  count = var.enable_flow_logs ? 1 : 0
+  name  = "${var.project}-${var.env}-flow-logs-policy"
+  role  = aws_iam_role.flow_logs[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:PutObject"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "${aws_s3_bucket.flow_logs[0].arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_flow_log" "main" {
+  count                = var.enable_flow_logs ? 1 : 0
+  log_destination     = aws_s3_bucket.flow_logs[0].arn
+  log_destination_type = "s3"
+  traffic_type        = "ALL"
+  vpc_id              = aws_vpc.main.id
+  iam_role_arn        = aws_iam_role.flow_logs[0].arn
+
+  tags = {
+    Name        = "${var.project}-${var.env}-vpc-flow-log"
+    Environment = var.env
+  }
+}

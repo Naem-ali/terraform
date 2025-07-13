@@ -20,6 +20,23 @@ module "vpc" {
     "ec2messages",
     "ssmmessages"
   ]
+
+  public_nacl_rules = concat(
+    var.public_nacl_rules,
+    [
+      {
+        rule_number = 130
+        egress     = false
+        protocol   = "tcp"
+        rule_action = "allow"
+        cidr_block = "10.0.0.0/8"
+        from_port  = 22
+        to_port    = 22
+      }
+    ]
+  )
+  
+  private_nacl_rules = var.private_nacl_rules
 }
 
 module "security_groups" {
