@@ -27,3 +27,13 @@ output "vpc_interface_endpoints" {
   description = "Map of interface endpoint IDs"
   value       = try({ for k, v in aws_vpc_endpoint.interface_endpoints : k => v.id }, {})
 }
+
+output "flow_logs_bucket_arn" {
+  description = "ARN of the flow logs S3 bucket"
+  value       = try(aws_s3_bucket.flow_logs[0].arn, null)
+}
+
+output "flow_logs_bucket_name" {
+  description = "Name of the flow logs S3 bucket"
+  value       = try(aws_s3_bucket.flow_logs[0].id, null)
+}

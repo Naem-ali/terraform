@@ -130,3 +130,15 @@ variable "private_nacl_rules" {
     }
   ]
 }
+
+variable "enable_flow_logs" {
+  description = "Enable VPC Flow Logs"
+  type        = bool
+  default     = true
+}
+
+variable "flow_logs_retention_days" {
+  description = "Number of days to retain flow logs in S3"
+  type        = number
+  default     = 30
+}

@@ -21,6 +21,9 @@ module "vpc" {
     "ssmmessages"
   ]
 
+  enable_flow_logs         = true
+  flow_logs_retention_days = 14  # Shorter retention for dev environment
+
   public_nacl_rules = concat(
     var.public_nacl_rules,
     [
