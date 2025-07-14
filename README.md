@@ -19,6 +19,10 @@ This project contains Terraform configurations for deploying a complete AWS infr
 │   │   ├── alb/                 # Application Load Balancer
 │   │   ├── auto_healing/        # Auto recovery mechanisms
 │   │   ├── backend_config/      # State management and locking
+│   │   ├── cloudtrail/         # Audit logging
+│   │   │   ├── main.tf         # Trail configuration
+│   │   │   ├── variables.tf    # Trail variables
+│   │   │   └── outputs.tf      # Trail outputs
 │   │   ├── cloudwatch_logs/     # Logging and monitoring
 │   │   ├── config/             # AWS Config rules
 │   │   ├── cost/               # Cost management
@@ -127,6 +131,7 @@ terraform apply tfplan
 - **Auto Healing**: Self-healing infrastructure
 - **KMS**: Key Management Service
 - **Secrets**: Secrets Management
+- **CloudTrail**: Audit logging
 
 ## Key Management Service (KMS)
 
@@ -239,6 +244,56 @@ module "secrets" {
 }
 ```
 
+## Audit Logging with CloudTrail
+
+### Overview
+The project includes a comprehensive CloudTrail module for audit logging:
+
+1. **Trail Configuration**:
+   - Multi-region support
+   - Organization-wide logging
+   - Log file validation
+   - CloudWatch integration
+   - KMS encryption
+
+2. **Event Types**:
+   - Management events
+   - Data events
+   - API insights
+   - Global service events
+
+3. **Storage Features**:
+   - S3 bucket management
+   - Lifecycle policies
+   - Access controls
+   - Bucket encryption
+
+4. **Security Controls**:
+   - KMS encryption
+   - IAM role separation
+   - Log validation
+   - Access monitoring
+
+### Usage Example
+```hcl
+module "cloudtrail" {
+  source = "../../modules/cloudtrail"
+  
+  project = local.project
+  env     = local.environment
+  
+  enable_multi_region = true
+  kms_key_id         = module.kms.key_ids["cloudtrail"]
+  
+  include_data_events = {
+    s3_buckets = {
+      resource_type = "AWS::S3::Object"
+      values        = ["arn:aws:s3:::"]
+      read_write    = "All"
+    }
+  }
+}
+```
 
 ## Environment Management
 
