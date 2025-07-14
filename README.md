@@ -20,9 +20,9 @@ This project contains Terraform configurations for deploying a complete AWS infr
 │   │   ├── auto_healing/        # Auto recovery mechanisms
 │   │   ├── backup/             # AWS Backup Management
 │   │   ├── cicd/               # AWS CI/CD Pipeline
-│   │   │   ├── main.tf         # CodePipeline and CodeBuild resources
-│   │   │   ├── variables.tf    # Pipeline configuration
-│   │   │   └── outputs.tf      # Pipeline outputs
+│   │   ├── cloudfront/         # CDN and WAF
+│   │   │   ├── main.tf         # Distribution and WAF rules
+│   │   │   └── variables.tf    # Configuration variables
 │   │   ├── cloudtrail/         # Audit logging
 │   │   │   ├── main.tf         # Trail configuration
 │   │   │   ├── variables.tf    # Trail variables
@@ -137,6 +137,7 @@ terraform apply tfplan
 - **CloudTrail**: Audit logging
 - **Backup**: AWS Backup Management
 - **CI/CD**: AWS CodePipeline and CodeBuild
+- **CloudFront**: Content Delivery and WAF Protection
 
 ## Key Management Service (KMS)
 
@@ -260,6 +261,51 @@ The project includes a comprehensive CloudTrail module for audit logging:
    - Log validation
    - Access monitoring
 
+
+## Content Delivery and WAF Protection
+
+### Overview
+The project includes a comprehensive CloudFront and WAF module for content delivery and security:
+
+1. **CloudFront Features**:
+   - Multiple origin support
+   - Custom cache behaviors
+   - SSL/TLS configuration
+   - Geographic restrictions
+   - Price class management
+   - S3 and ALB origins
+
+2. **WAF Protection**:
+   - SQL injection prevention
+   - XSS protection
+   - Rate limiting
+   - Managed rule sets
+   - Custom rule configuration
+
+3. **Security Features**:
+   - HTTPS enforcement
+   - Modern TLS protocols
+   - Origin access identity
+   - Geographic blocking
+   - Request filtering
+
+4. **Performance Features**:
+   - Global edge locations
+   - Cache optimization
+   - Compression
+   - Origin failover
+   - Health checks
+
+
+### Best Practices
+- Enable WAF protection
+- Configure proper cache behaviors
+- Use HTTPS only
+- Implement rate limiting
+- Monitor WAF metrics
+- Regular rule updates
+- Custom error responses
+- Origin failover configuration
 
 ## Environment Management
 
