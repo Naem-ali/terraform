@@ -24,6 +24,10 @@ This project contains Terraform configurations for deploying a complete AWS infr
 │   │   ├── cost/               # Cost management
 │   │   ├── ecs/                # Container services
 │   │   ├── guardduty/          # Security monitoring
+│   │   ├── kms/                # Key Management Service
+│   │   │   ├── main.tf         # KMS key creation and policies
+│   │   │   ├── variables.tf    # KMS configuration variables
+│   │   │   └── outputs.tf      # KMS outputs
 │   │   ├── mutex_lock/         # State locking mechanism
 │   │   ├── network_firewall/   # Network security
 │   │   ├── route53/            # DNS management
@@ -120,6 +124,58 @@ terraform apply tfplan
 - **GuardDuty**: Security monitoring
 - **Config**: Compliance rules
 - **Auto Healing**: Self-healing infrastructure
+- **KMS**: Key Management Service
+
+## Key Management Service (KMS)
+
+### Overview
+The project includes a centralized KMS module for managing encryption keys across services:
+
+1. **Service-Specific Keys**:
+   - S3 bucket encryption
+   - RDS database encryption
+   - EBS volume encryption
+   - Secrets Manager encryption
+   - Lambda environment variables
+   - CloudWatch Logs encryption
+
+2. **Key Features**:
+   - Automatic key rotation
+   - Multi-region support
+   - Custom retention periods
+   - Service principal access
+   - IAM role separation
+
+3. **Security Controls**:
+   - Administrator/User separation
+   - Service-specific policies
+   - Customizable key policies
+   - Deletion protection
+
+### Usage Example
+```hcl
+module "kms" {
+  source = "../../modules/kms"
+  
+  project = "demo"
+  env     = "dev"
+  
+  # Key configurations for different services
+  keys = {
+    s3 = {
+      description = "S3 encryption key"
+      service_principals = ["s3"]
+    }
+    # Additional key configurations...
+  }
+}
+```
+
+### Key Management
+- Key creation and rotation
+- Access policy management
+- Service integration
+- Monitoring and logging
 
 ## Environment Management
 
