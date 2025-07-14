@@ -1,0 +1,46 @@
+image: hashicorp/terraform:latest
+
+variables:
+  TF_VAR_environment: ${CI_COMMIT_REF_NAME}
+  TF_IN_AUTOMATION: "true"
+
+stages:
+- validate
+- plan
+- apply
+
+cache:
+  paths:
+  - .terraform
+
+validate:
+  stage: validate
+  script:
+  - terraform init -backend=false
+  - terraform validate
+  - terraform fmt -check -recursive
+  rules:
+  - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  - if: '$CI_COMMIT_BRANCH == "main"'
+
+plan:
+  stage: plan
+  script:
+  - terraform init
+  - terraform plan -out=tfplan
+  artifacts:
+    paths:
+    - tfplan
+  rules:
+  - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  - if: '$CI_COMMIT_BRANCH == "main"'
+
+apply:
+  stage: apply
+  script:
+  - terraform apply -auto-approve tfplan
+  dependencies:
+  - plan
+  rules:
+  - if: '$CI_COMMIT_BRANCH == "main"'
+  when: manual

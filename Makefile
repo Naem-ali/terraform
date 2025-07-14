@@ -1,11 +1,27 @@
+.PHONY: init plan apply destroy validate lint
+
 init:
-	cd infra/environments/dev && terraform init
+	terraform init
 
 plan:
-	cd infra/environments/dev && terraform plan
+	terraform plan -out=tfplan
 
 apply:
-	cd infra/environments/dev && terraform apply -auto-approve
+	terraform apply tfplan
 
 destroy:
-	cd infra/environments/dev && terraform destroy -auto-approve
+	terraform destroy
+
+validate:
+	terraform validate
+	terraform fmt -check -recursive
+	tflint --recursive
+
+lint:
+	checkov -d .
+	tfsec .
+
+test:
+	cd test && go test -v ./...
+
+all: validate lint plan

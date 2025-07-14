@@ -104,6 +104,71 @@ terraform apply tfplan
 - Dev environment auto-shutdown
 - Resource optimization
 
+## CI/CD Pipeline Integration
+
+### GitHub Actions Workflow
+The project includes automated CI/CD pipelines using GitHub Actions with:
+- Automated validation
+- Security scanning
+- Plan generation
+- Conditional deployment
+- Environment protection
+
+```bash
+# View workflow status
+gh workflow list
+gh run list
+```
+
+### GitLab CI Pipeline
+Alternative CI/CD implementation using GitLab CI with:
+- Multi-stage pipeline
+- Cache optimization
+- Artifact management
+- Manual production deployments
+
+```bash
+# View pipeline status
+gitlab-cli pipeline list
+```
+
+### Local Development Pipeline
+Pre-commit hooks and local validation:
+```bash
+# Install pre-commit hooks
+pre-commit install
+
+# Run local validation
+make validate
+make lint
+```
+
+## Deployment Process
+
+1. **Development**:
+   ```bash
+   # Switch to dev workspace
+   ./scripts/switch-workspace.sh dev
+   
+   # Deploy changes
+   make plan
+   make apply
+   ```
+
+2. **Staging/Production**:
+   - Create pull request
+   - Wait for CI validation
+   - Get approval
+   - Merge to main
+   - Automated deployment
+
+## Pipeline Security Features
+- Environment protection rules
+- Manual approval for production
+- Secrets management
+- Security scanning
+- Compliance checks
+
 ## Best Practices
 
 1. Always run `validate.sh` before applying changes
