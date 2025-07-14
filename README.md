@@ -24,31 +24,49 @@ This project contains Terraform configurations for deploying a complete AWS infr
 │   │   ├── cost/               # Cost management
 │   │   ├── ecs/                # Container services
 │   │   ├── guardduty/          # Security monitoring
+│   │   ├── mutex_lock/         # State locking mechanism
 │   │   ├── network_firewall/   # Network security
 │   │   ├── route53/            # DNS management
 │   │   ├── s3_logs/           # Log storage
 │   │   ├── security_groups/    # Security group management
 │   │   ├── sns/                # Notification service
+│   │   ├── state_management/   # Terraform state configuration
 │   │   ├── tags/              # Resource tagging
 │   │   ├── vpc/               # Network infrastructure
 │   │   └── xray/              # Distributed tracing
 │   │
-│   └── environments/
-│       └── dev/               # Development environment
-│           ├── backend.tf     # Backend configuration
-│           ├── data.tf        # Data sources
-│           ├── main.tf        # Main configuration
-│           ├── providers.tf    # Provider configuration
-│           ├── variables.tf    # Variable definitions
-│           └── workspace.tf    # Workspace settings
+│   ├── environments/
+│   │   ├── dev/               # Development environment
+│   │   │   ├── backend.tf     # Backend configuration
+│   │   │   ├── data.tf        # Data sources
+│   │   │   ├── main.tf        # Main configuration
+│   │   │   ├── providers.tf   # Provider configuration
+│   │   │   ├── variables.tf   # Variable definitions
+│   │   │   └── workspace.tf   # Workspace settings
+│   │   │
+│   │   ├── staging/          # Staging environment
+│   │   └── prod/            # Production environment
+│   │
+│   └── global/              # Global configurations
+│       ├── backend/         # Backend setup
+│       └── iam/             # IAM configurations
 │
 ├── scripts/
-│   ├── cleanup-old-workspaces.sh   # Workspace management
-│   ├── init-backend.sh             # Backend initialization
-│   ├── setup-backend.sh            # Backend setup
-│   ├── switch-workspace.sh         # Workspace switching
-│   ├── test-infrastructure.sh      # Infrastructure testing
-│   └── validate.sh                 # Configuration validation
+│   ├── backend/
+│   │   ├── init-backend.sh          # Backend initialization
+│   │   └── setup-state-lock.sh      # DynamoDB lock setup
+│   │
+│   ├── cleanup/
+│   │   ├── cleanup-old-workspaces.sh # Workspace management
+│   │   └── cleanup-state.sh         # State file cleanup
+│   │
+│   ├── validation/
+│   │   ├── validate.sh              # Configuration validation
+│   │   └── security-check.sh        # Security validation
+│   │
+│   └── deployment/
+│       ├── switch-workspace.sh      # Workspace switching
+│       └── test-infrastructure.sh   # Infrastructure testing
 │
 ├── .gitignore              # Git ignore patterns
 ├── .gitlab-ci.yml          # GitLab CI/CD pipeline
