@@ -135,12 +135,6 @@ MIT License - see [LICENSE](LICENSE) for details
 4. Push to the branch
 5. Open a Pull Request
 
-## 📚 Documentation
-
-- [Detailed Module Documentation](./docs)
-- [Architecture Decision Records](./docs/adr)
-- [Security Controls](./docs/security)
-- [Runbooks](./docs/runbooks)
 
 # AWS Infrastructure as Code with Terraform
 
