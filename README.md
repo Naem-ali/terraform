@@ -25,13 +25,14 @@ This project contains Terraform configurations for deploying a complete AWS infr
 │   │   ├── ecs/                # Container services
 │   │   ├── guardduty/          # Security monitoring
 │   │   ├── kms/                # Key Management Service
-│   │   │   ├── main.tf         # KMS key creation and policies
-│   │   │   ├── variables.tf    # KMS configuration variables
-│   │   │   └── outputs.tf      # KMS outputs
 │   │   ├── mutex_lock/         # State locking mechanism
 │   │   ├── network_firewall/   # Network security
 │   │   ├── route53/            # DNS management
 │   │   ├── s3_logs/           # Log storage
+│   │   ├── secrets/           # Secrets Management
+│   │   │   ├── main.tf         # Secret resources
+│   │   │   ├── variables.tf    # Configuration variables
+│   │   │   └── outputs.tf      # Secret ARNs and names
 │   │   ├── security_groups/    # Security group management
 │   │   ├── sns/                # Notification service
 │   │   ├── state_management/   # Terraform state configuration
@@ -125,6 +126,7 @@ terraform apply tfplan
 - **Config**: Compliance rules
 - **Auto Healing**: Self-healing infrastructure
 - **KMS**: Key Management Service
+- **Secrets**: Secrets Management
 
 ## Key Management Service (KMS)
 
@@ -176,6 +178,67 @@ module "kms" {
 - Access policy management
 - Service integration
 - Monitoring and logging
+
+## Secrets Management
+
+### Overview
+The project includes a comprehensive secrets management module supporting both AWS Secrets Manager and Parameter Store:
+
+1. **Secrets Manager Features**:
+   - Secure credential storage
+   - Automatic rotation
+   - Key-value pair support
+   - JSON structure support
+   - Recovery windows
+   - KMS encryption
+
+2. **Parameter Store Features**:
+   - Configuration management
+   - Hierarchical structure
+   - Different parameter types
+   - Tiered storage options
+   - Secure string support
+
+3. **Security Features**:
+   - KMS integration
+   - IAM role separation
+   - Rotation policies
+   - Access logging
+   - Version tracking
+
+### Usage Example
+```hcl
+module "secrets" {
+  source = "../../modules/secrets"
+  
+  project    = local.project
+  env       = local.environment
+  kms_key_id = module.kms.key_ids["secrets"]
+
+  secrets_manager = {
+    database = {
+      description = "Database credentials"
+      secret_key_value_pairs = {
+        username = "admin"
+        password = "secret-password"
+      }
+      rotation_enabled = true
+    }
+  }
+
+  parameter_store = {
+    app_config = {
+      description = "Application configuration"
+      type        = "SecureString"
+      value       = jsonencode({
+        debug_mode = true
+        api_url    = "https://api.dev.example.com"
+      })
+    }
+  }
+}
+```
+
 
 ## Environment Management
 
@@ -412,29 +475,12 @@ terraform state list
 terraform state show [RESOURCE]
 ```
 
-### Best Practices
-- Use unique state files per environment
-- Enable versioning for rollback capability
-- Implement state locking
-- Regular state backups
-- Monitor lock timeouts
-- Clean up old state files
-
 ## Pipeline Security Features
 - Environment protection rules
 - Manual approval for production
 - Secrets management
 - Security scanning
 - Compliance checks
-
-## Best Practices
-
-1. Always run `validate.sh` before applying changes
-2. Use workspaces for environment separation
-3. Review security group rules regularly
-4. Monitor CloudWatch logs and metrics
-5. Keep state files backed up
-6. Use Git for version control
 
 ## Troubleshooting
 
