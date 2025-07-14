@@ -107,16 +107,110 @@ terraform apply tfplan
 ## CI/CD Pipeline Integration
 
 ### GitLab CI Pipeline
-Alternative CI/CD implementation using GitLab CI with:
-- Multi-stage pipeline
-- Cache optimization
-- Artifact management
-- Manual production deployments
+The project uses GitLab CI for automated pipelines with extensive stages:
+
+1. **Lint Stage**
+   - Terraform format checking
+   - TFLint for extended validation
+   - Ensures code quality standards
+
+2. **Security Stage**
+   - TFSec scanning
+   - Checkov policy checks
+   - Scheduled security scans
+   - Security reports generation
+
+3. **Validation Stage**
+   - Terraform configuration validation
+   - Backend validation
+   - Resource verification
+
+4. **Plan Stage**
+   - Infrastructure plan generation
+   - Workspace management
+   - Plan artifacts storage
+   - JSON report generation
+
+5. **Cost Stage**
+   - Infrastructure cost estimation
+   - Cost report generation
+   - Budget validation
+
+6. **Approval Stage**
+   - Manual approval gate
+   - Production deployment protection
+   - Change review process
+
+7. **Apply Stage**
+   - Infrastructure deployment
+   - Environment tracking
+   - Deployment URLs
+   - State management
+
+8. **Test Stage**
+   - Integration testing
+   - Infrastructure validation
+   - Service health checks
+   - DNS verification
+
+9. **Cleanup Stage**
+   - Workspace management
+   - Old plan cleanup
+   - Resource optimization
+
+### Pipeline Features
 
 ```bash
 # View pipeline status
 gitlab-cli pipeline list
+
+# View specific pipeline
+gitlab-cli pipeline show <pipeline-id>
+
+# View security reports
+gitlab-cli security report
+
+# Check cost estimation
+gitlab-cli artifacts download cost.json
+
+# Run manual cleanup
+gitlab-cli job run cleanup
 ```
+
+### Environment Protection
+- Production deployments require approval
+- Manual intervention for critical stages
+- Environment-specific configurations
+- Scheduled security checks
+
+### Pipeline Artifacts
+- Terraform plans
+- Security reports
+- Cost estimations
+- Test results
+- Infrastructure state
+
+### Cache Management
+- Terraform plugins
+- Provider caches
+- State file caching
+- Plan artifacts
+
+### Pipeline Stages
+1. **Validate**:
+   - Syntax checking
+   - Format validation
+   - Security scanning
+   
+2. **Plan**:
+   - Infrastructure plan generation
+   - Plan artifact storage
+   - Change review
+
+3. **Apply**:
+   - Manual approval required
+   - Production safeguards
+   - State file backup
 
 ### Local Development Pipeline
 Pre-commit hooks and local validation:
