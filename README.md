@@ -2,7 +2,6 @@
 
 ![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white)
 ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)
 [![CI](https://img.shields.io/badge/CI-Passing-success?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/actions)
 
 Enterprise-grade AWS infrastructure using Terraform, featuring comprehensive security, monitoring, and automation.
@@ -186,9 +185,6 @@ go test -v ./test/...
 - ✅ VPC flow logs
 - ✅ IAM least privilege
 
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details
 
 ## 🤝 Contributing
 
