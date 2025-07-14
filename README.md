@@ -1,3 +1,147 @@
+# AWS Infrastructure as Code 🏗️
+
+![Terraform](https://img.shields.io/badge/terraform-%235835CC.svg?style=for-the-badge&logo=terraform&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)
+[![CI](https://img.shields.io/badge/CI-Passing-success?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/actions)
+
+Enterprise-grade AWS infrastructure using Terraform, featuring comprehensive security, monitoring, and automation.
+
+## ✨ Features
+
+- 🔐 **Security First**: KMS encryption, WAF protection, GuardDuty integration
+- 🚀 **CI/CD Pipeline**: AWS CodePipeline with GitHub/CodeCommit integration
+- 🌐 **Content Delivery**: CloudFront with WAF and custom origins
+- 💾 **Backup & Recovery**: Cross-region backups with lifecycle management
+- 📊 **Monitoring**: CloudWatch, X-Ray, and custom metrics
+- 🔒 **State Management**: S3 backend with DynamoDB locking
+
+## 🎯 Supported AWS Services
+
+| Service | Description |
+|---------|-------------|
+| 🌐 VPC | Network infrastructure with public/private subnets |
+| 🐳 ECS | Container orchestration and management |
+| ⚖️ ALB | Application load balancing with SSL/TLS |
+| 🔍 Route53 | DNS management and domain routing |
+| 🛡️ WAF | Web application firewall protection |
+| 💾 RDS | Managed relational databases |
+| 🗃️ EFS | Elastic file system storage |
+| ⚡ Lambda | Serverless compute functions |
+| 🪣 S3 | Object storage with versioning |
+| 📊 CloudWatch | Monitoring and logging |
+
+## 🚀 Quick Start
+
+1. **Prerequisites**
+```bash
+aws --version  # AWS CLI v2+
+terraform -v   # Terraform v1.0+
+```
+
+2. **Clone & Initialize**
+```bash
+git clone https://github.com/your-org/terraform-aws-infra.git
+cd terraform-aws-infra
+terraform init
+```
+
+3. **Deploy Infrastructure**
+```bash
+terraform workspace new dev
+terraform plan -out=tfplan
+terraform apply tfplan
+```
+
+## ⚙️ Module Configuration
+
+### Required Permissions
+
+```hcl
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*",
+        "ec2:*",
+        "rds:*"
+        # ...other required permissions...
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+### Input Variables
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| `project` | Project name | `string` | - |
+| `env` | Environment name | `string` | - |
+| `region` | AWS region | `string` | `us-west-2` |
+
+### Outputs
+
+| Name | Description |
+|------|-------------|
+| `vpc_id` | VPC ID |
+| `public_subnets` | List of public subnet IDs |
+| `private_subnets` | List of private subnet IDs |
+
+## 🧪 Testing & CI
+
+```bash
+# Run pre-commit hooks
+pre-commit run --all-files
+
+# Run security checks
+tfsec .
+checkov -d .
+
+# Run integration tests
+go test -v ./test/...
+```
+
+## 📦 Modules
+
+| Module | Description | Status |
+|--------|-------------|--------|
+| [VPC](./modules/vpc) | Network infrastructure | ✅ |
+| [ECS](./modules/ecs) | Container orchestration | ✅ |
+| [KMS](./modules/kms) | Key management | ✅ |
+| [Backup](./modules/backup) | AWS Backup configuration | ✅ |
+
+## 🔒 Security Features
+
+- ✅ KMS encryption for all sensitive data
+- ✅ WAF protection for web applications
+- ✅ GuardDuty threat detection
+- ✅ CloudTrail audit logging
+- ✅ VPC flow logs
+- ✅ IAM least privilege
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+## 📚 Documentation
+
+- [Detailed Module Documentation](./docs)
+- [Architecture Decision Records](./docs/adr)
+- [Security Controls](./docs/security)
+- [Runbooks](./docs/runbooks)
+
 # AWS Infrastructure as Code with Terraform
 
 This project contains Terraform configurations for deploying a complete AWS infrastructure including VPC, ECS, ALB, monitoring, and security components.
