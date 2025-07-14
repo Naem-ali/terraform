@@ -19,8 +19,10 @@ This project contains Terraform configurations for deploying a complete AWS infr
 │   │   ├── alb/                 # Application Load Balancer
 │   │   ├── auto_healing/        # Auto recovery mechanisms
 │   │   ├── backup/             # AWS Backup Management
-│   │   │   ├── main.tf         # Backup resources
-│   │   │   └── variables.tf    # Backup configuration
+│   │   ├── cicd/               # AWS CI/CD Pipeline
+│   │   │   ├── main.tf         # CodePipeline and CodeBuild resources
+│   │   │   ├── variables.tf    # Pipeline configuration
+│   │   │   └── outputs.tf      # Pipeline outputs
 │   │   ├── cloudtrail/         # Audit logging
 │   │   │   ├── main.tf         # Trail configuration
 │   │   │   ├── variables.tf    # Trail variables
@@ -135,6 +137,7 @@ terraform apply tfplan
 - **Secrets**: Secrets Management
 - **CloudTrail**: Audit logging
 - **Backup**: AWS Backup Management
+- **CI/CD**: AWS CodePipeline and CodeBuild
 
 ## Key Management Service (KMS)
 
@@ -299,122 +302,69 @@ The project includes a comprehensive CloudTrail module for audit logging:
 
 ## CI/CD Pipeline Integration
 
-### GitLab CI Pipeline
-The project uses GitLab CI for automated pipelines with extensive stages:
+### AWS CodePipeline Overview
+The project includes a comprehensive CI/CD solution using AWS native services:
 
-1. **Lint Stage**
-   - Terraform format checking
-   - TFLint for extended validation
-   - Ensures code quality standards
+1. **Pipeline Stages**:
+   - Source (GitHub/CodeCommit)
+   - Build (CodeBuild)
+   - Deploy (ECS/Lambda/S3)
+   - Test and Validation
 
-2. **Security Stage**
-   - TFSec scanning
-   - Checkov policy checks
-   - Scheduled security scans
-   - Security reports generation
+2. **Build Features**:
+   - Custom build environments
+   - Docker support
+   - Environment variables
+   - Build caching
+   - Test integration
 
-3. **Validation Stage**
-   - Terraform configuration validation
-   - Backend validation
-   - Resource verification
+3. **Deployment Options**:
+   - ECS services
+   - Lambda functions
+   - S3 static sites
+   - Blue/Green deployment
 
-4. **Plan Stage**
-   - Infrastructure plan generation
-   - Workspace management
-   - Plan artifacts storage
-   - JSON report generation
+4. **Security Features**:
+   - KMS encryption
+   - IAM role separation
+   - Artifact versioning
+   - Secret management
 
-5. **Cost Stage**
-   - Infrastructure cost estimation
-   - Cost report generation
-   - Budget validation
-
-6. **Approval Stage**
-   - Manual approval gate
-   - Production deployment protection
-   - Change review process
-
-7. **Apply Stage**
-   - Infrastructure deployment
-   - Environment tracking
-   - Deployment URLs
-   - State management
-
-8. **Test Stage**
-   - Integration testing
-   - Infrastructure validation
-   - Service health checks
-   - DNS verification
-
-9. **Cleanup Stage**
-   - Workspace management
-   - Old plan cleanup
-   - Resource optimization
 
 ### Pipeline Features
 
 ```bash
 # View pipeline status
-gitlab-cli pipeline list
+aws codepipeline get-pipeline-state --name my-pipeline
 
-# View specific pipeline
-gitlab-cli pipeline show <pipeline-id>
+# Start execution
+aws codepipeline start-pipeline-execution --name my-pipeline
 
-# View security reports
-gitlab-cli security report
+# View build logs
+aws codebuild batch-get-builds --ids build-id
 
-# Check cost estimation
-gitlab-cli artifacts download cost.json
-
-# Run manual cleanup
-gitlab-cli job run cleanup
+# Check deployments
+aws ecs describe-services --cluster my-cluster --services my-service
 ```
 
 ### Environment Protection
-- Production deployments require approval
-- Manual intervention for critical stages
-- Environment-specific configurations
-- Scheduled security checks
+- Approval actions
+- Environment segregation
+- IAM restrictions
+- Deployment guards
 
-### Pipeline Artifacts
-- Terraform plans
-- Security reports
-- Cost estimations
-- Test results
-- Infrastructure state
+### Build Configuration
+- Custom Docker images
+- Build specifications
+- Test integration
+- Security scanning
 
-### Cache Management
-- Terraform plugins
-- Provider caches
-- State file caching
-- Plan artifacts
-
-### Pipeline Stages
-1. **Validate**:
-   - Syntax checking
-   - Format validation
-   - Security scanning
-   
-2. **Plan**:
-   - Infrastructure plan generation
-   - Plan artifact storage
-   - Change review
-
-3. **Apply**:
-   - Manual approval required
-   - Production safeguards
-   - State file backup
-
-### Local Development Pipeline
-Pre-commit hooks and local validation:
-```bash
-# Install pre-commit hooks
-pre-commit install
-
-# Run local validation
-make validate
-make lint
-```
+### Best Practices
+- Use source control
+- Implement testing
+- Enable notifications
+- Monitor deployments
+- Regular maintenance
 
 ## Deployment Process
 
