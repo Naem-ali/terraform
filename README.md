@@ -106,20 +106,6 @@ terraform apply tfplan
 
 ## CI/CD Pipeline Integration
 
-### GitHub Actions Workflow
-The project includes automated CI/CD pipelines using GitHub Actions with:
-- Automated validation
-- Security scanning
-- Plan generation
-- Conditional deployment
-- Environment protection
-
-```bash
-# View workflow status
-gh workflow list
-gh run list
-```
-
 ### GitLab CI Pipeline
 Alternative CI/CD implementation using GitLab CI with:
 - Multi-stage pipeline
