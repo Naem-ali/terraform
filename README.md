@@ -14,10 +14,47 @@ This project contains Terraform configurations for deploying a complete AWS infr
 ```
 /home/nick/Terraform/
 ├── infra/
-│   ├── modules/         # Reusable Terraform modules
-│   └── environments/    # Environment-specific configurations
-├── scripts/            # Utility scripts
-└── docs/              # Documentation
+│   ├── modules/
+│   │   ├── acm/                 # SSL/TLS certificate management
+│   │   ├── alb/                 # Application Load Balancer
+│   │   ├── auto_healing/        # Auto recovery mechanisms
+│   │   ├── backend_config/      # State management and locking
+│   │   ├── cloudwatch_logs/     # Logging and monitoring
+│   │   ├── config/             # AWS Config rules
+│   │   ├── cost/               # Cost management
+│   │   ├── ecs/                # Container services
+│   │   ├── guardduty/          # Security monitoring
+│   │   ├── network_firewall/   # Network security
+│   │   ├── route53/            # DNS management
+│   │   ├── s3_logs/           # Log storage
+│   │   ├── security_groups/    # Security group management
+│   │   ├── sns/                # Notification service
+│   │   ├── tags/              # Resource tagging
+│   │   ├── vpc/               # Network infrastructure
+│   │   └── xray/              # Distributed tracing
+│   │
+│   └── environments/
+│       └── dev/               # Development environment
+│           ├── backend.tf     # Backend configuration
+│           ├── data.tf        # Data sources
+│           ├── main.tf        # Main configuration
+│           ├── providers.tf    # Provider configuration
+│           ├── variables.tf    # Variable definitions
+│           └── workspace.tf    # Workspace settings
+│
+├── scripts/
+│   ├── cleanup-old-workspaces.sh   # Workspace management
+│   ├── init-backend.sh             # Backend initialization
+│   ├── setup-backend.sh            # Backend setup
+│   ├── switch-workspace.sh         # Workspace switching
+│   ├── test-infrastructure.sh      # Infrastructure testing
+│   └── validate.sh                 # Configuration validation
+│
+├── .gitignore              # Git ignore patterns
+├── .gitlab-ci.yml          # GitLab CI/CD pipeline
+├── .pre-commit-config.yaml # Pre-commit hooks
+├── Makefile               # Common commands
+└── README.md              # Project documentation
 ```
 
 ## Quick Start
