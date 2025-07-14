@@ -82,7 +82,6 @@ This project contains Terraform configurations for deploying a complete AWS infr
 │       └── test-infrastructure.sh   # Infrastructure testing
 │
 ├── .gitignore              # Git ignore patterns
-├── .gitlab-ci.yml          # GitLab CI/CD pipeline
 ├── .pre-commit-config.yaml # Pre-commit hooks
 ├── Makefile               # Common commands
 └── README.md              # Project documentation
