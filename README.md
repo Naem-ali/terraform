@@ -18,7 +18,9 @@ This project contains Terraform configurations for deploying a complete AWS infr
 │   │   ├── acm/                 # SSL/TLS certificate management
 │   │   ├── alb/                 # Application Load Balancer
 │   │   ├── auto_healing/        # Auto recovery mechanisms
-│   │   ├── backend_config/      # State management and locking
+│   │   ├── backup/             # AWS Backup Management
+│   │   │   ├── main.tf         # Backup resources
+│   │   │   └── variables.tf    # Backup configuration
 │   │   ├── cloudtrail/         # Audit logging
 │   │   │   ├── main.tf         # Trail configuration
 │   │   │   ├── variables.tf    # Trail variables
@@ -132,6 +134,7 @@ terraform apply tfplan
 - **KMS**: Key Management Service
 - **Secrets**: Secrets Management
 - **CloudTrail**: Audit logging
+- **Backup**: AWS Backup Management
 
 ## Key Management Service (KMS)
 
@@ -159,24 +162,6 @@ The project includes a centralized KMS module for managing encryption keys acros
    - Customizable key policies
    - Deletion protection
 
-### Usage Example
-```hcl
-module "kms" {
-  source = "../../modules/kms"
-  
-  project = "demo"
-  env     = "dev"
-  
-  # Key configurations for different services
-  keys = {
-    s3 = {
-      description = "S3 encryption key"
-      service_principals = ["s3"]
-    }
-    # Additional key configurations...
-  }
-}
-```
 
 ### Key Management
 - Key creation and rotation
@@ -211,38 +196,37 @@ The project includes a comprehensive secrets management module supporting both A
    - Access logging
    - Version tracking
 
-### Usage Example
-```hcl
-module "secrets" {
-  source = "../../modules/secrets"
-  
-  project    = local.project
-  env       = local.environment
-  kms_key_id = module.kms.key_ids["secrets"]
 
-  secrets_manager = {
-    database = {
-      description = "Database credentials"
-      secret_key_value_pairs = {
-        username = "admin"
-        password = "secret-password"
-      }
-      rotation_enabled = true
-    }
-  }
+## Backup Management
 
-  parameter_store = {
-    app_config = {
-      description = "Application configuration"
-      type        = "SecureString"
-      value       = jsonencode({
-        debug_mode = true
-        api_url    = "https://api.dev.example.com"
-      })
-    }
-  }
-}
-```
+### Overview
+The project includes a comprehensive AWS Backup module with:
+
+1. **Backup Plans**:
+   - Multiple backup schedules
+   - Cross-region replication
+   - Cold storage transition
+   - Lifecycle management
+   - Custom retention periods
+
+2. **Protected Resources**:
+   - RDS databases
+   - EFS filesystems
+   - DynamoDB tables
+   - EBS volumes
+
+3. **Security Features**:
+   - KMS encryption
+   - IAM role separation
+   - Cross-region copies
+   - Vault access control
+
+4. **Management Features**:
+   - Tag-based selection
+   - Automated scheduling
+   - Lifecycle policies
+   - Recovery points
+
 
 ## Audit Logging with CloudTrail
 
@@ -274,26 +258,6 @@ The project includes a comprehensive CloudTrail module for audit logging:
    - Log validation
    - Access monitoring
 
-### Usage Example
-```hcl
-module "cloudtrail" {
-  source = "../../modules/cloudtrail"
-  
-  project = local.project
-  env     = local.environment
-  
-  enable_multi_region = true
-  kms_key_id         = module.kms.key_ids["cloudtrail"]
-  
-  include_data_events = {
-    s3_buckets = {
-      resource_type = "AWS::S3::Object"
-      values        = ["arn:aws:s3:::"]
-      read_write    = "All"
-    }
-  }
-}
-```
 
 ## Environment Management
 
