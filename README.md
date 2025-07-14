@@ -242,6 +242,73 @@ make lint
    - Merge to main
    - Automated deployment
 
+## State Management and Mutex Locking
+
+### Backend Configuration
+The project uses a secure S3 backend with DynamoDB for state locking:
+
+- **State Storage**: S3 with encryption and versioning
+- **State Locking**: DynamoDB with global tables
+- **Security**: KMS encryption and access logging
+
+```bash
+# Initialize backend for new environment
+./scripts/init-backend.sh dev
+```
+
+### Features
+
+1. **S3 Backend**
+   - Versioning enabled
+   - Server-side encryption
+   - Access logging
+   - Lifecycle management
+   - Public access blocked
+
+2. **DynamoDB Locking**
+   - Global tables for multi-region support
+   - Point-in-time recovery
+   - TTL for stale locks
+   - Auto-scaling enabled
+   - Encryption at rest
+
+3. **Security Measures**
+   - KMS key rotation
+   - Access logging
+   - IAM role separation
+   - Encryption in transit
+   - Bucket policies
+
+### Workspace Management
+```bash
+# Create/switch workspace
+terraform workspace new dev
+terraform workspace select dev
+
+# List workspaces
+terraform workspace list
+```
+
+### State Operations
+```bash
+# Force unlock state
+terraform force-unlock [LOCK_ID]
+
+# List state
+terraform state list
+
+# Show state
+terraform state show [RESOURCE]
+```
+
+### Best Practices
+- Use unique state files per environment
+- Enable versioning for rollback capability
+- Implement state locking
+- Regular state backups
+- Monitor lock timeouts
+- Clean up old state files
+
 ## Pipeline Security Features
 - Environment protection rules
 - Manual approval for production
