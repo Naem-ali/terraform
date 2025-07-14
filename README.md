@@ -16,20 +16,83 @@ Enterprise-grade AWS infrastructure using Terraform, featuring comprehensive sec
 - 📊 **Monitoring**: CloudWatch, X-Ray, and custom metrics
 - 🔒 **State Management**: S3 backend with DynamoDB locking
 
-## 🎯 Supported AWS Services
+## 🏗️ Architecture
 
-| Service | Description |
-|---------|-------------|
-| 🌐 VPC | Network infrastructure with public/private subnets |
-| 🐳 ECS | Container orchestration and management |
-| ⚖️ ALB | Application load balancing with SSL/TLS |
-| 🔍 Route53 | DNS management and domain routing |
-| 🛡️ WAF | Web application firewall protection |
-| 💾 RDS | Managed relational databases |
-| 🗃️ EFS | Elastic file system storage |
-| ⚡ Lambda | Serverless compute functions |
-| 🪣 S3 | Object storage with versioning |
-| 📊 CloudWatch | Monitoring and logging |
+```mermaid
+graph TB
+    %% External Services
+    GitHub[("GitHub/CodeCommit\n📦")] --> CodePipeline
+    
+    subgraph AWS Cloud
+        %% Network Layer
+        subgraph VPC ["VPC 🌐"]
+            direction TB
+            subgraph Public ["Public Subnets"]
+                ALB["Application Load Balancer ⚖️"]
+                NAT["NAT Gateway 🔒"]
+            end
+            
+            subgraph Private ["Private Subnets"]
+                ECS["ECS Cluster 🐳"]
+                RDS[("RDS 💾")]
+                EFS[("EFS 🗃️")]
+            end
+            
+            Public --> Private
+        end
+        
+        %% Security Layer
+        WAF["WAF 🛡️"] --> CloudFront
+        GuardDuty["GuardDuty 🔍"]
+        Config["AWS Config ⚙️"]
+        
+        %% CDN Layer
+        CloudFront["CloudFront 🌐"] --> ALB
+        CloudFront --> S3
+        
+        %% CI/CD Pipeline
+        subgraph Pipeline ["CI/CD Pipeline 🚀"]
+            CodePipeline --> CodeBuild
+            CodeBuild --> ECR[("ECR Registry 📦")]
+            ECR --> ECS
+        end
+        
+        %% Storage Layer
+        S3[("S3 Buckets 🪣")]
+        Backup["AWS Backup 💾"] --> |Protects| RDS
+        Backup --> |Protects| EFS
+        
+        %% Security Services
+        KMS["KMS 🔑"] --> |Encrypts| S3
+        KMS --> |Encrypts| RDS
+        KMS --> |Encrypts| SecretsManager
+        
+        %% Management Layer
+        CloudWatch["CloudWatch 📊"]
+        CloudTrail["CloudTrail 📝"]
+        SecretsManager["Secrets Manager 🔐"]
+        
+        %% Monitoring Connections
+        ECS --> CloudWatch
+        RDS --> CloudWatch
+        ALB --> CloudWatch
+        
+        %% DNS Management
+        Route53["Route 53 🔍"] --> CloudFront
+    end
+    
+    %% External Access
+    Users["Users 👥"] --> Route53
+    Admins["Administrators 👤"] --> |Access| AWS["AWS Console ☁️"]
+
+    classDef aws fill:#ff9900,stroke:#232f3e,stroke-width:2px,color:#232f3e;
+    classDef security fill:#dd3522,stroke:#232f3e,stroke-width:2px,color:white;
+    classDef network fill:#3b48cc,stroke:#232f3e,stroke-width:2px,color:white;
+    
+    class ALB,ECS,RDS,EFS,S3,ECR aws;
+    class WAF,GuardDuty,KMS,SecretsManager security;
+    class VPC,CloudFront,Route53 network;
+```
 
 ## 🚀 Quick Start
 
