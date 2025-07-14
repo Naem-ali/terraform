@@ -103,8 +103,8 @@ terraform -v   # Terraform v1.0+
 
 2. **Clone & Initialize**
 ```bash
-git clone https://github.com/your-org/terraform-aws-infra.git
-cd terraform-aws-infra
+git clone https://github.com/Naem-ali/terraform.git
+cd terraform
 terraform init
 ```
 
